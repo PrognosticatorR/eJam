@@ -1,53 +1,80 @@
 import React, { useEffect, useState } from "react";
-import { List, Avatar, Skeleton, Button } from "antd";
+import { List, Skeleton } from "antd";
+import { useDispatch, useSelector } from "react-redux";
 import {
-  DeploymentUnitOutlined,
-  DeleteColumnOutlined,
-  DeleteTwoTone,
-} from "@ant-design/icons";
-
-import Axios from "axios";
+  listDeployments,
+  deleteDeployment,
+} from "../redux/action/deploymentActions";
+import { DeleteTwoTone } from "@ant-design/icons";
+import Timer from "./Timer";
 
 const DeploymentList = () => {
-  const [initLoading, setinitLoading] = useState(true);
-  const [data, setdata] = useState([]);
-  const [list, setList] = useState([]);
-  useEffect(() => {
-    setTimeout(() => {
-      getData((res) => {
-        setinitLoading(false);
-        setdata(res.data);
-        setList(res.data);
-      }, 2000);
-    });
-  }, []);
+  const [isDeploying, setisDeploying] = useState(true);
+  const dispatch = useDispatch();
+  const deploymentsList = useSelector((state) => state.deploymentList);
+  const deleteDeploymentRequest = useSelector(
+    (state) => state.deploymentRemove
+  );
+  const removeDeploymentTimeRequest = useSelector(
+    (state) => state.deploymentTime
+  );
 
-  console.log(data, list);
-  const getData = (callback) => {
-    Axios.get("/api/deployments").then((res) => callback(res));
-  };
+  const { success: deleteDeploymentSuccess } = deleteDeploymentRequest;
+  const {
+    success: removeDeploymentTimeSuccess,
+    inProgress: deploymentinProgress,
+    countdoun: deploymentCountdown,
+  } = removeDeploymentTimeRequest;
+
+  useEffect(() => {
+    dispatch(listDeployments());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (deleteDeploymentSuccess && !deploymentinProgress) {
+      dispatch(listDeployments());
+    }
+    setisDeploying(deploymentinProgress);
+  }, [
+    dispatch,
+    deleteDeploymentSuccess,
+    removeDeploymentTimeSuccess,
+    deploymentinProgress,
+  ]);
 
   return (
     <List
+      style={{ display: "flex", flexDirection: "column" }}
       className="demo-loadmore-list"
-      loading={initLoading}
+      loading={deploymentsList.loading}
       itemLayout="horizontal"
-      dataSource={list}
+      dataSource={deploymentsList.deployments}
       renderItem={(item) => (
-        <List.Item>
-          <Skeleton avatar title={false} loading={item.loading} active>
+        <List.Item key={item.id}>
+          <Skeleton
+            avatar
+            title={false}
+            loading={item.loading}
+            key={"s-" + item.id}
+            active
+          >
             <List.Item.Meta
-              avatar={<Avatar icon={<DeploymentUnitOutlined />} />}
+              key={"lim-" + item.id}
               title={<a href={item.url}>{item.templateName.toUpperCase()}</a>}
               description={item.url}
             />
-            <div style={{ paddingLeft: 10 }}>
-              <DeleteTwoTone style={{ fontSize: "20px", cursor: "pointer" }} />
+            <div style={{ alignItems: "flex-end" }} key={"div" + item.id}>
+              <DeleteTwoTone
+                style={{ fontSize: "20px", cursor: "pointer" }}
+                onClick={() => dispatch(deleteDeployment(item.id))}
+              />
             </div>
           </Skeleton>
         </List.Item>
       )}
-    />
+    >
+      {isDeploying && <Timer key={"timer"} initial={deploymentCountdown} />}
+    </List>
   );
 };
 

@@ -25,7 +25,6 @@ const deploymentSchema = new mongoose.Schema(
     },
     templateName: {
       type: String,
-      unique: "template name should be unique!",
       required: "name is required",
     },
     version: {
@@ -43,6 +42,7 @@ const deploymentSchema = new mongoose.Schema(
       transform(doc, ret) {
         ret.id = ret._id;
         delete ret._id;
+        delete ret.__v;
       },
     },
   }
