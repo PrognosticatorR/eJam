@@ -1,3 +1,3 @@
 # eJam
 
-### visit [a link](https://limitless-tor-34342.herokuapp.com/)
+### visit [ demo](https://limitless-tor-34342.herokuapp.com/)
