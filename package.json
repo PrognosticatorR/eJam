@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@auscheon/common": "0.0.2",
+    "@types/cors": "^2.8.9",
     "@types/express": "^4.17.9",
     "@types/mongoose": "^5.10.2",
     "cors": "^2.8.5",
